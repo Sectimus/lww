@@ -1,22 +1,26 @@
-# ntfs-mount-manager
+# LWW — Linux, Windows, Whenever
 
-A Rust GUI tool for safely mounting and managing NTFS volumes on Linux, with Proton integration for gaming.
+*aka "Linus/Luke Was Wrong"*
+
+High performance NTFS setup for Linux, primarily for gaming. Built in Rust.
 
 ---
 
 ## What is this?
 
-The main use case is simple: you want to play games through Proton on an NTFS drive, the same way you would on Windows, without juggling two separate game libraries or copying hundreds of gigabytes across filesystems. That should just work, and mostly it does — but the setup to get there safely is more involved than it should be.
+The common wisdom is that you shouldn't use NTFS on Linux for anything serious, and you definitely shouldn't try to run a Steam library off it. That advice is outdated. The `ntfs3` kernel driver is fast, stable, and perfectly capable of handling a gaming workload — it just needs to be configured correctly, which is fiddly enough that most people either get it wrong or give up.
 
-This tool handles the NTFS side of that: configuring mounts correctly, checking volume health, managing the dirty bit, and making sure your fstab isn't going to cause problems. It also checks your installed Proton versions and lets you know if anything is out of date, so your games are running on the best available compatibility layer without you having to manually track releases.
+LWW handles the setup for you. It gives you a GUI to configure your NTFS mounts safely, manages the dirty bit, writes correct fstab entries, runs health checks before touching anything, and keeps an eye on your Proton versions — so you can run your Windows game library through Proton on an NTFS drive without reformatting anything or maintaining two copies of the same games.
+
+Linus was wrong. Luke was wrong. NTFS on Linux is fine.
 
 ---
 
 ## Background
 
-The main motivation was wanting to run a Steam library on an NTFS drive through Proton without maintaining two separate copies of everything or reformatting drives that already had games on them from Windows.
+This came out of about a year of daily use on Arch Linux with ntfs3, mounting Windows drives for gaming through Proton without a single instance of data loss or corruption. A lot of the horror stories you'll find online trace back to specific scenarios — Fast Startup, hibernation, wrong mount flags — rather than the driver itself being unreliable.
 
-This was developed and tested on Wayland + Arch + Nvidia + KDE — **W.A.N.K** — a combination with a well-earned reputation for being painful. If it holds up here, it'll hold up anywhere. And with this tool, the NTFS side of W.A.N.K is at least one less thing to worry about.
+The setup this was developed and tested on is Wayland + Arch + Nvidia + KDE — **W.A.N.K** — a combination with a well-earned reputation for being painful for reasons well beyond NTFS. If it works reliably here, it'll work anywhere. And with LWW, the NTFS side of W.A.N.K is at least one less thing to worry about.
 
 ---
 
@@ -37,11 +41,11 @@ This was developed and tested on Wayland + Arch + Nvidia + KDE — **W.A.N.K** �
 
 ## Proton integration
 
-Beyond NTFS configuration, the tool also:
+Beyond NTFS configuration, LWW also:
 
 - Detects installed Proton and Proton-GE versions across your Steam library locations
 - Checks for available updates and flags anything out of date
-- Shows which version each game is configured to use
+- Shows which Proton version each game is configured to use
 - Highlights known compatibility improvements relevant to your installed titles where possible
 
 The goal is to keep everything in one place — your drives are mounted correctly, your Proton versions are current, and you can just play.
@@ -50,7 +54,7 @@ The goal is to keep everything in one place — your drives are mounted correctl
 
 ## Safety checks
 
-Before mounting or modifying anything, the tool inspects the volume and tells you what it found:
+Before mounting or modifying anything, LWW inspects the volume and tells you what it found:
 
 | What's detected | What happens |
 |---|---|
@@ -59,30 +63,10 @@ Before mounting or modifying anything, the tool inspects the volume and tells yo
 | MFT inconsistencies | Blocks the mount, tells you to run `chkdsk` from Windows first |
 | Hibernation state suspected | Hard warning, offers read-only only, explains the risk clearly |
 
-If anything looks wrong, you'll be prompted to back up the volume before proceeding. The tool won't quietly do things to a volume that looks damaged.
+If anything looks wrong, you'll be prompted to back up the volume before proceeding. LWW won't quietly do things to a volume that looks damaged.
 
 ---
 
 ## Why ntfs3?
 
-`ntfs3` is the in-kernel NTFS driver that landed in Linux 5.15. It's faster than the older FUSE-based `ntfs-3g` and is actively maintained as part of the kernel. It also refuses to mount dirty volumes by default, which is actually the safer behaviour — `ntfs-3g` silently ignores the dirty bit, which is arguably worse.
-
-This tool targets ntfs3 only.
-
----
-
-## Building
-
-### Requirements
-
-- Rust (via [rustup](https://rustup.rs))
-- Linux kernel 5.15+
-- `ntfs-3g` userspace tools (`ntfsfix`, `ntfsinfo`, `ntfsck`)
-- Root / sudo access
-
-```bash
-git clone https://github.com/yourusername/ntfs-mount-manager
-cd ntfs-mount-manager
-cargo build --release
-sudo ./tar
-get/release/ntfs-mount-manager
+`ntfs3` is the in-kernel NTFS driver that landed
